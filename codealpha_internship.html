@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fitness Tracker</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f7f9fc;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+      padding: 2rem;
+      background: white;
+      box-shadow: 0 0 20px rgba(0,0,0,0.05);
+      border-radius: 12px;
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    input {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .summary {
+      background: #f1f1f1;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+
+    .progress {
+      height: 20px;
+      background-color: #ddd;
+      border-radius: 10px;
+      margin-top: 1rem;
+      overflow: hidden;
+    }
+
+    .bar {
+      height: 100%;
+      width: 0%;
+      background-color: #28a745;
+      transition: width 0.3s ease;
+    }
+
+    #weekly-log {
+      list-style: none;
+      padding-left: 0;
+      margin-top: 1rem;
+    }
+
+    #weekly-log li {
+      background: #e9ecef;
+      padding: 10px;
+      margin-bottom: 5px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Fitness Tracker</h1>
+
+  <form id="fitness-form">
+    <input type="number" id="steps" placeholder="Steps Taken" required />
+    <input type="number" id="calories" placeholder="Calories Burned" required />
+    <input type="number" id="workout" placeholder="Workout Time (min)" required />
+    <button type="submit">Add Entry</button>
+  </form>
+
+  <h2>Today’s Summary</h2>
+  <div class="summary">
+    <p>Steps: <span id="total-steps">0</span></p>
+    <p>Calories: <span id="total-calories">0</span></p>
+    <p>Workout: <span id="total-workout">0</span> min</p>
+    <div class="progress">
+      <div class="bar" id="progress-bar"></div>
+    </div>
+  </div>
+
+  <h2>Weekly Progress</h2>
+  <ul id="weekly-log"></ul>
+</div>
+
+<script>
+  document.getElementById("fitness-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const steps = parseInt(document.getElementById("steps").value);
+    const calories = parseInt(document.getElementById("calories").value);
+    const workout = parseInt(document.getElementById("workout").value);
+
+    const today = new Date().toLocaleDateString();
+
+    const data = {
+      date: today,
+      steps,
+      calories,
+      workout
+    };
+
+    let log = JSON.parse(localStorage.getItem("fitnessLog")) || [];
+    log.push(data);
+    localStorage.setItem("fitnessLog", JSON.stringify(log));
+
+    updateSummary();
+    updateWeeklyLog();
+
+    this.reset();
+  });
+
+  function updateSummary() {
+    let log = JSON.parse(localStorage.getItem("fitnessLog")) || [];
+    const today = new Date().toLocaleDateString();
+    const todayEntries = log.filter(entry => entry.date === today);
+
+    const totalSteps = todayEntries.reduce((sum, e) => sum + e.steps, 0);
+    const totalCalories = todayEntries.reduce((sum, e) => sum + e.calories, 0);
+    const totalWorkout = todayEntries.reduce((sum, e) => sum + e.workout, 0);
+
+    document.getElementById("total-steps").innerText = totalSteps;
+    document.getElementById("total-calories").innerText = totalCalories;
+    document.getElementById("total-workout").innerText = totalWorkout;
+
+    const progress = Math.min((totalWorkout / 60) * 100, 100); // Goal: 60 min
+    document.getElementById("progress-bar").style.width = `${progress}%`;
+  }
+
+  function updateWeeklyLog() {
+    let log = JSON.parse(localStorage.getItem("fitnessLog")) || [];
+    const days = {};
+
+    log.forEach(entry => {
+      if (!days[entry.date]) {
+        days[entry.date] = { steps: 0, calories: 0, workout: 0 };
+      }
+      days[entry.date].steps += entry.steps;
+      days[entry.date].calories += entry.calories;
+      days[entry.date].workout += entry.workout;
+    });
+
+    const sortedDates = Object.keys(days).slice(-7); // Last 7 days
+    const ul = document.getElementById("weekly-log");
+    ul.innerHTML = "";
+
+    sortedDates.forEach(date => {
+      const day = days[date];
+      const li = document.createElement("li");
+      li.textContent = `${date} – Steps: ${day.steps}, Calories: ${day.calories}, Workout: ${day.workout} min`;
+      ul.appendChild(li);
+    });
+  }
+
+  // On page load
+  updateSummary();
+  updateWeeklyLog();
+</script>
+
+</body>
+</html>

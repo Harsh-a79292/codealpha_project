@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Language Learning App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f7;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: #007BFF;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 24px;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      background: #e0e0e0;
+    }
+
+    .tabs button {
+      padding: 10px 20px;
+      border: none;
+      background: #ccc;
+      cursor: pointer;
+    }
+
+    .tabs button.active {
+      background: #007BFF;
+      color: white;
+    }
+
+    .tab-content {
+      padding: 20px;
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .flashcard {
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      width: 250px;
+      height: 150px;
+      margin: 10px auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    .daily-lesson {
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 10px;
+      max-width: 400px;
+      margin: 10px auto;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .quiz-question {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .quiz-question input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+    }
+
+    .btn {
+      background: #007BFF;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>🌍 Language Learning App</header>
+
+  <div class="tabs">
+    <button class="tab-button active" onclick="openTab('vocabulary')">Vocabulary</button>
+    <button class="tab-button" onclick="openTab('grammar')">Grammar</button>
+    <button class="tab-button" onclick="openTab('quiz')">Quiz</button>
+  </div>
+
+  <!-- VOCABULARY TAB -->
+  <div class="tab-content active" id="vocabulary">
+    <div class="flashcard" onclick="flipCard(this)">
+      <span data-front="Hello" data-back="Hola">Hello</span>
+    </div>
+    <button class="btn" onclick="speakWord('Hola')">🔊 Pronounce</button>
+
+    <div class="daily-lesson">
+      <h3>📖 Daily Lesson</h3>
+      <p>Phrase: How are you?</p>
+      <p>Translation: ¿Cómo estás?</p>
+      <button class="btn" onclick="speakWord('¿Cómo estás?')">🔊 Hear It</button>
+    </div>
+  </div>
+
+  <!-- GRAMMAR TAB -->
+  <div class="tab-content" id="grammar">
+    <div class="daily-lesson">
+      <h3>Grammar Tip</h3>
+      <p><strong>Spanish Gender:</strong> Nouns ending in -o are usually masculine (el libro), while those ending in -a are usually feminine (la casa).</p>
+    </div>
+  </div>
+
+  <!-- QUIZ TAB -->
+  <div class="tab-content" id="quiz">
+    <div class="quiz-question">
+      <h3>Translate to Spanish: "Thank you"</h3>
+      <input type="text" id="quizAnswer" placeholder="Your Answer...">
+      <button class="btn" onclick="checkQuiz()">Submit</button>
+      <p id="quizResult"></p>
+    </div>
+  </div>
+
+  <script>
+    // Tabs
+    function openTab(tabId) {
+      document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    // Flashcard Flip
+    function flipCard(card) {
+      let span = card.querySelector('span');
+      let front = span.getAttribute('data-front');
+      let back = span.getAttribute('data-back');
+      if (span.textContent === front) {
+        span.textContent = back;
+      } else {
+        span.textContent = front;
+      }
+    }
+
+    // Speech
+    function speakWord(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'es-ES'; // Spanish
+      speechSynthesis.speak(utterance);
+    }
+
+    // Quiz Logic
+    function checkQuiz() {
+      const userAnswer = document.getElementById('quizAnswer').value.trim().toLowerCase();
+      const result = document.getElementById('quizResult');
+      if (userAnswer === 'gracias') {
+        result.textContent = '✅ Correct!';
+        result.style.color = 'green';
+      } else {
+        result.textContent = '❌ Try again. Correct answer: "Gracias"';
+        result.style.color = 'red';
+      }
+    }
+
+    // Local Storage Example
+    const lessonSeen = localStorage.getItem("dailyLessonSeen");
+    if (!lessonSeen) {
+      alert("New daily lesson available!");
+      localStorage.setItem("dailyLessonSeen", "yes");
+    }
+  </script>
+
+</body>
+</html>
